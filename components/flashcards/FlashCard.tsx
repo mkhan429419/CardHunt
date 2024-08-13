@@ -1,5 +1,7 @@
 'use client'
-import React, { useState } from 'react'
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 type CardProps = {
   id: number,
@@ -12,26 +14,47 @@ const FlashCard = ({ card }: { card: CardProps }) => {
 
   const handleCardClick = () => {
     setIsFlipped(!isFlipped);
-  }
+  };
 
   return (
     <div
-      key={card.id}
-      className={`perspective p-4 bg-[#FFEDD5] rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-300 ease-in-out hover:cursor-pointer ${
-        isFlipped ? 'flip-card' : ''
-      } min-h-28 text-center` }
+      className="relative w-64 h-40 perspective" // Ensure perspective for 3D effect
+      style={{ perspective: '1000px' }} // Perspective for depth
       onClick={handleCardClick}
     >
-      <div className={`relative transition-transform duration-500 ease-in-out transform ${isFlipped ? 'rotate-y-180' : ''}`}>
-        <div className={`absolute inset-0 flex items-center justify-center backface-hidden ${isFlipped ? 'opacity-0' : 'opacity-100'}`}>
-          <div className="text-gray-700 m-auto">{card.front}</div>
-        </div>
-        <div className={`absolute inset-0 flex items-center justify-center backface-hidden ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
-          <div className=" font-semibold text-lg m-auto">{card.back}</div>
-        </div>
-      </div>
-    </div>
-  )
-}
+      <motion.div
+        className="relative w-full h-full"
+        initial={{ rotateY: 0 }}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6 }}
+        style={{ transformStyle: 'preserve-3d' }} // Preserve 3D space
+      >
+        {/* Front face of the card */}
+        <motion.div
+          className="absolute w-full h-full bg-[#FFEDD5] rounded-lg flex items-center justify-center"
+          style={{
+            backfaceVisibility: 'hidden',
+            opacity: isFlipped ? 0 : 1,
+            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+          }}
+        >
+          <div className="text-gray-700 text-center">{card.front}</div>
+        </motion.div>
 
-export default FlashCard
+        {/* Back face of the card */}
+        <motion.div
+          className="absolute w-full h-full bg-[#FFEDD5] rounded-lg flex items-center justify-center"
+          style={{
+            backfaceVisibility: 'hidden',
+            opacity: isFlipped ? 1 : 0,
+            transform: 'rotateY(180deg)'
+          }}
+        >
+          <div className="text-gray-700 font-semibold text-lg">{card.back}</div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default FlashCard;

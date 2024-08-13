@@ -67,6 +67,7 @@ model FlashcardPost {
   categories  Category[]       // Many-to-many relation with Category
   upvotes     Upvote[]
   comments    Comment[]
+  notifications Notification[]
   userId      String
   user        User             @relation(fields: [userId], references: [id])
   createdAt   DateTime         @default(now())
@@ -102,8 +103,8 @@ model Notification {
   body         String
   profilePicture String
   flashcardId  String
-  commentId    String?
   flashcard    FlashcardPost    @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  commentId    String?
   type         NotificationType
   status       NotificationStatus @default(UNREAD)
   createdAt    DateTime           @default(now())

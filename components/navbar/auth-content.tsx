@@ -2,12 +2,13 @@ import Image from "next/image";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { signIn } from "next-auth/react";
+import LogoSmall from '@/public/logo/logo-small.png'
 
 const AuthContent = () => {
   return (
     <div className="flex items-center justify-center flex-col">
       <Image
-        src={"/logo/small-logo.png"}
+        src={LogoSmall}
         alt="logo"
         width={200}
         height={200}

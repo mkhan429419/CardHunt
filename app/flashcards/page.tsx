@@ -1,11 +1,13 @@
-import React from 'react';
+'use client'
+import React, { useEffect } from 'react';
 import FlashCard from "@/components/flashcards/FlashCard";
 import Generate from "@/components/flashcards/GenerateFlashcardBar";
 import { Button } from "@/components/ui/button";
+import { generateFlashcards } from '@/lib/utils/generateFlashcard';
 
 type Props = {};
 
-const Flashcards = (props: Props) => {
+const Flashcards =async (props: Props) => {
   const flashcards = [
     { id: 1, back: "React", front: "A JavaScript library for building user interfaces." },
     { id: 2, back: "Tailwind CSS", front: "A utility-first CSS framework for rapid UI development." },
@@ -18,6 +20,13 @@ const Flashcards = (props: Props) => {
     { id: 9, back: "TypeScript", front: "A typed superset of JavaScript that compiles to plain JavaScript." },
     { id: 10, back: "GraphQL", front: "A query language for your API." },
   ];
+
+  useEffect(()=>{
+    const flashcard =  generateFlashcards("Solar System");
+    console.log(flashcard);
+
+  }, [])
+ 
 
   return (
     <>

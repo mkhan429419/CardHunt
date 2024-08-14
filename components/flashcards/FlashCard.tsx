@@ -12,6 +12,8 @@ type CardProps = {
 const FlashCard = ({ card }: { card: CardProps }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
+  
+
   const handleCardClick = () => {
     setIsFlipped(!isFlipped);
   };

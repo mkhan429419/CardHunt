@@ -7,8 +7,12 @@ import SignInButton from "./sign-in-button";
 import SignUpButton from "./sign-up-button";
 import Modal from "../ui/modals/modal";
 import AuthContent from "./auth-content";
+import Avatar from "./avatar";
 
-const Navbar = () => {
+interface NavbarProps {
+  authenticatedUser?:any
+}
+const Navbar:React.FC<NavbarProps> = ({authenticatedUser}) => {
   const [authModalVisible, setAuthModalVisible] = useState(false);
 
   const handleButtonClick = () => {
@@ -24,9 +28,18 @@ const Navbar = () => {
         <div className="absolute right-1/2 translate-x-1/2 transform z-10">
           <Menu />
         </div>
+        <div className="flex items-center text-sm space-x-6 cursor-pointer">
+          {authenticatedUser? (
+            <>
+            <Avatar authenticatedUser={authenticatedUser}/>
+            </>
+          ):(
         <div onClick={handleButtonClick} className="flex items-center space-x-6 cursor-pointer text-sm">
           <SignInButton />
           <SignUpButton />
+        </div>
+        )}
+
         </div>
         <Modal visible={authModalVisible} setVisible={setAuthModalVisible}>
           <AuthContent/>

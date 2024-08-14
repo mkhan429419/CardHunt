@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 type CardProps = {
-  id: number,
+  id: string,
   front: string,
   back: string
 }

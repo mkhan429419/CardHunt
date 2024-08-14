@@ -1,16 +1,15 @@
+import { FlashcardContent } from "@/types";
+import { v4 as uuidv4 } from 'uuid';
 const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
 const YOUR_SITE_URL = process.env.YOUR_SITE_URL || 'https://your-site.com';
 const YOUR_SITE_NAME = process.env.YOUR_SITE_NAME || 'Your Site Name';
 
 
-type FlashcardContent = {
-  front: string;
-  back: string;
-};
+
 
 export async function generateFlashcards(topic: string, count: number = 10): Promise<FlashcardContent[] | null> {
   try {
-    // Generate a prompt to request multiple flashcards
+    
     const prompt = `Generate ${count} flashcards on the topic "${topic}". Each flashcard should have a front text containing a question and back text containing the answer. Format: Front: [question] Back: [answer]. Do not include any extra text or formatting.`;
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -46,7 +45,7 @@ export async function generateFlashcards(topic: string, count: number = 10): Pro
       while ((match = flashcardRegex.exec(content)) !== null) {
         const front = match[1].trim();
         const back = match[2].trim();
-        flashcards.push({ front, back });
+        flashcards.push({    id: uuidv4(),front, back });
       }
 console.log('flashcards:', flashcards);
       return flashcards;

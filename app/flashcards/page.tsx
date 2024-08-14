@@ -1,31 +1,33 @@
 'use client'
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import FlashCard from "@/components/flashcards/FlashCard";
 import Generate from "@/components/flashcards/GenerateFlashcardBar";
 import { Button } from "@/components/ui/button";
 import { generateFlashcards } from '@/lib/utils/generateFlashcard';
+import { FlashcardContent } from '@/types';
 
 type Props = {};
 
-const Flashcards =async (props: Props) => {
-  const flashcards = [
-    { id: 1, back: "React", front: "A JavaScript library for building user interfaces." },
-    { id: 2, back: "Tailwind CSS", front: "A utility-first CSS framework for rapid UI development." },
-    { id: 3, back: "Next.js", front: "A React framework for building modern web applications." },
-    { id: 4, back: "TypeScript", front: "A typed superset of JavaScript that compiles to plain JavaScript." },
-    { id: 5, back: "GraphQL", front: "A query language for your API." },
-    { id: 6, back: "React", front: "A JavaScript library for building user interfaces." },
-    { id: 7, back: "Tailwind CSS", front: "A utility-first CSS framework for rapid UI development." },
-    { id: 8, back: "Next.js", front: "A React framework for building modern web applications." },
-    { id: 9, back: "TypeScript", front: "A typed superset of JavaScript that compiles to plain JavaScript." },
-    { id: 10, back: "GraphQL", front: "A query language for your API." },
-  ];
+const Flashcards = (props: Props) => {
+ const [flashcards, setFlashcards] = useState<FlashcardContent[]>([]);
 
-  useEffect(()=>{
-    const flashcard =  generateFlashcards("Solar System");
-    console.log(flashcard);
-
-  }, [])
+ useEffect(() => {
+    // Define an async function to fetch flashcards
+    const fetchFlashcards = async () => {
+      try {
+        const data = await generateFlashcards("Solar System");
+        if (data) {
+          setFlashcards(data);
+        } else {
+          console.error('No flashcards data received');
+        }
+      } catch (error) {
+        console.error('Error fetching flashcards:', error);
+      }
+    };
+    
+    fetchFlashcards();
+  }, []);
  
 
   return (

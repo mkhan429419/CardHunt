@@ -5,7 +5,7 @@ import Google from "next-auth/providers/google";
 import { db } from "./lib/db";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  // adapter: PrismaAdapter(db),
+  adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   providers: [
     GitHub({
@@ -17,4 +17,5 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       clientSecret: process.env.GOOGLE_SECRET,
     }),
   ],
+  secret: process.env.AUTH_SECRET, 
 });

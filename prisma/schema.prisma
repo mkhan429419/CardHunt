@@ -37,70 +37,63 @@ model User {
   id            String    @id @default(cuid())
   image         String
   name          String
-  email         String    @unique
+  email         String  @unique
   emailVerified DateTime?
-  isPremium     Boolean   @default(false)
+
+  isPremium     Boolean @default(false)
   notifications Notification[]
   upvotes       Upvote[]
   accounts      Account[]
   sessions      Session[]
-  flashcards    Flashcard[]
+  flashcards    Flashcard[]  // Changed from "products"
   comments      Comment[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt 
 }
 
 model Category {
   id          String     @id @default(cuid())
   name        String     @unique
-  flashcards  Flashcard[] // Many-to-many relation with Flashcard
+  flashcards  Flashcard[] // Changed from "products"
 }
 
 model Flashcard {
-  id          String        @id @default(cuid())
-  title       String
-  content     String
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  headline    String
   rank        Int
   description String
-  images      Image[]
-  categories  Category[]    // Many-to-many relation with Category
+  front       String     // Field to store the front content of the flashcard
+  back        String     // Field to store the back content of the flashcard
+  notification Notification[] 
   comments    Comment[]
   upvotes     Upvote[]
-  notifications Notification[] // Add this relation
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  user        User          @relation(fields: [userId], references: [id])
+  categories  Category[] // Many-to-many relation with Category
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id])
   userId      String
 
   @@index([userId])
 }
 
-model Image {
-  id          String   @id @default(cuid())
-  flashcardId String
-  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
-  url         String  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([flashcardId])
-}
 
 model Upvote {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   flashcardId String
-  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade) // Changed from "product"
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Comment {
   id             String    @id @default(cuid())
   profilePicture String
   flashcardId    String
-  flashcard      Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  flashcard      Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade) // Changed from "product"
   userId         String
   user           User      @relation(fields: [userId], references: [id])
   body           String
@@ -115,7 +108,7 @@ model Notification {
   body           String
   profilePicture String
   flashcardId    String
-  flashcard      Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  flashcard      Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade) // Changed from "product"
   commentId      String?
   type           NotificationType
   status         NotificationStatus @default(UNREAD)

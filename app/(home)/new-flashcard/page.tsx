@@ -2,6 +2,8 @@
 
 import React, { useCallback, useState } from "react";
 import Flashcards from "@/app/flashcards/page"; // Import the Flashcards component
+import { Separator } from "@/components/ui/separator";
+import { createFlashcard } from "@/lib/server-actions";
 
 // DONT USE categories with spaces
 const categories = [
@@ -34,6 +36,7 @@ const categories = [
 ];
 
 const NewCard = () => {
+  const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -77,6 +80,38 @@ const NewCard = () => {
   const prevStep = useCallback(() => {
     setStep(step - 1);
   }, [step]);
+
+  const handleGoToCards = () => {
+    window.location.href = "/my-cards";
+  };
+  const submitAnotherCard = () => {
+    setStep(1);
+    setName("");
+    setSlug("");
+    setHeadline("");
+    setShortDescription("");
+    setSelectedCategories([]);
+  };
+
+  const submitCard = async () => {
+    setLoading(true);
+
+    try {
+      await createFlashcard({
+        name,
+        slug,
+        headline,
+        description: shortDescription,
+        front: "Default front content", // Placeholder for front content
+        back: "Default back content", // Placeholder for back content
+        category: selectedCategories,
+      });
+      setStep(6);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center py-8 md:py-20">
@@ -237,6 +272,36 @@ const NewCard = () => {
           </div>
         )}
 
+        {step === 6 && (
+          <div className="space-y-10">
+            <div className="text-4xl font-semibold"> Congratulations 🎉 </div>
+            <div className="text-xl font-light mt-4 leading-8 ">
+              Your product has been successfully submitted. Our team will review
+              it and get back to you soon.
+            </div>
+
+            <div className="flex flex-col  gap-4">
+              <div
+                onClick={handleGoToCards}
+                className="bg-[#ff6154] text-white py-2 px-4
+               rounded mt-4 flex w-60 justify-center items-center cursor-pointer"
+              >
+                Go to your products
+              </div>
+
+              <Separator />
+
+              <div
+                onClick={submitAnotherCard}
+                className="text-[#ff6154] py-2 px-4 rounded mt-4 
+              flex w-60 justify-center items-center cursor-pointer"
+              >
+                Submit another product
+              </div>
+            </div>
+          </div>
+        )}
+
         {step !== 6 && (
           <>
             <div className="flex justify-between items-center mt-10">
@@ -248,7 +313,10 @@ const NewCard = () => {
 
               <div className="flex items-center">
                 {step === 5 ? (
-                  <button className="bg-[#ff6154] text-white py-2 px-4 rounded-md mt-4 items-end">
+                  <button
+                    onClick={submitCard}
+                    className="bg-[#ff6154] text-white py-2 px-4 rounded-md mt-4 items-end"
+                  >
                     Submit
                   </button>
                 ) : (

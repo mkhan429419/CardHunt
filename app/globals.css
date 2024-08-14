@@ -67,3 +67,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.perspective {
+  perspective: 1000px;
+}

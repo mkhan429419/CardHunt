@@ -3,8 +3,8 @@ import Link from "next/link";
 const Submit = () => {
   return (
     <div>
-      <Link href="/new-product" className="text-[#ff6154]">
-        Submit
+      <Link href="/new-flashcard" className="text-[#ff6154]">
+        Start new set
       </Link>
     </div>
   );

@@ -4,13 +4,15 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 type CardProps = {
-  id: number,
+  id: string,
   front: string,
   back: string
 }
 
 const FlashCard = ({ card }: { card: CardProps }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+
+  
 
   const handleCardClick = () => {
     setIsFlipped(!isFlipped);

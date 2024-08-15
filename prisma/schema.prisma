@@ -125,7 +125,7 @@ model Flashcard {
 }
 
 model FlashcardCollection {
-  id          String      @id
+  id          String      @id @default(cuid())
   name        String
   slug        String      @unique
   headline    String

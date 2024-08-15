@@ -35,7 +35,7 @@ const Avatar: React.FC<AvatarProps> = ({ authenticatedUser }) => {
         <DropdownMenuContent className="w-40 space-y-1 p-2 text-gray-600">
           <DropdownMenuItem>
             <Link
-              href="/my-products"
+              href="/my-cards"
               className="flex gap-x-2 rounded-sm w-full cursor-pointer"
             >
               <PiPackage className="text-xl" />

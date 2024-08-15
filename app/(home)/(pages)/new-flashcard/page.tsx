@@ -3,10 +3,12 @@
 import React, { useCallback, useState } from "react";
 import Flashcards from "@/app/flashcards/page"; // Import the Flashcards component
 import { Separator } from "@/components/ui/separator";
-import { createFlashcardCollection } from "@/lib/server-actions";
 import { FlashcardContent } from "@/types";
-import { v4 as uuidv4 } from 'uuid';
-// DONT USE categories with spaces
+import { v4 as uuidv4 } from "uuid";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { PiXCircleFill } from "react-icons/pi";
+
 const categories = [
   "Media",
   "Blockchain",
@@ -77,8 +79,76 @@ const NewCard = () => {
   };
 
   const nextStep = useCallback(() => {
+    if (step === 1 && name.length < 4) {
+      toast(
+        <>
+          <div className="flex items-center gap-4 mx-auto">
+            <PiXCircleFill className="text-red-500 text-3xl" />
+            <div className="text-md font-semibold">
+              Please enter at least 4 characters for the card set name.
+            </div>
+          </div>
+        </>,
+        {
+          position: "top-center",
+        }
+      );
+      return;
+    }
+
+    if (step === 2 && selectedCategories.length < 3) {
+      toast(
+        <>
+          <div className="flex items-center gap-4 mx-auto">
+            <PiXCircleFill className="text-red-500 text-3xl" />
+            <div className="text-md font-semibold">
+              Please select at least 3 categories for the card set.
+            </div>
+          </div>
+        </>,
+        {
+          position: "top-center",
+        }
+      );
+      return;
+    }
+
+    if (step === 3 && headline.length < 10) {
+      toast(
+        <>
+          <div className="flex items-center gap-4 mx-auto">
+            <PiXCircleFill className="text-red-500 text-3xl" />
+            <div className="text-md font-semibold">
+              Please enter at least 10 characters for the headline.
+            </div>
+          </div>
+        </>,
+        {
+          position: "top-center",
+        }
+      );
+      return;
+    }
+    if (step === 3 && shortDescription.length < 20) {
+      toast(
+        <>
+          <div className="flex items-center gap-4 mx-auto">
+            <PiXCircleFill className="text-red-500 text-3xl" />
+            <div className="text-md font-semibold">
+              Please enter at least 20 characters for the short description.
+            </div>
+          </div>
+        </>,
+        {
+          position: "top-center",
+        }
+      );
+      return;
+    }
+
     setStep(step + 1);
-  }, [step]);
+  }, [step, name, selectedCategories, headline, shortDescription]);
+
   const prevStep = useCallback(() => {
     setStep(step - 1);
   }, [step]);
@@ -95,15 +165,14 @@ const NewCard = () => {
     setSelectedCategories([]);
   };
 
-
-   const submitCard=async()=> {
-    console.log('flashcards in parent: ',flashcards)
-    const flashcardCollectionId= uuidv4()
+  const submitCard = async () => {
+    console.log("flashcards in parent: ", flashcards);
+    const flashcardCollectionId = uuidv4();
     try {
-      const response = await fetch('/api/create-flashcard-collection', {
-        method: 'POST',
+      const response = await fetch("/api/create-flashcard-collection", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           id: flashcardCollectionId,
@@ -112,19 +181,21 @@ const NewCard = () => {
           headline,
           description: shortDescription,
           categories: selectedCategories,
-          flashcards: flashcards.map((flashcard: { front: any; back: any;id:string }) => ({
-            flashcardCollectionId: flashcardCollectionId,
-            front: flashcard.front,
-            back: flashcard.back,
-            id: flashcard.id
-          })),
+          flashcards: flashcards.map(
+            (flashcard: { front: any; back: any; id: string }) => ({
+              flashcardCollectionId: flashcardCollectionId,
+              front: flashcard.front,
+              back: flashcard.back,
+              id: flashcard.id,
+            })
+          ),
         }),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to create flashcard collection');
+        throw new Error("Failed to create flashcard collection");
       }
-  
+
       const data = await response.json();
       console.log("Flashcard collection created:", data);
       setStep(6);
@@ -132,14 +203,19 @@ const NewCard = () => {
       console.error(error);
       setLoading(false);
     }
-  }
- 
+  };
 
   return (
     <div className="flex items-center justify-center py-8 md:py-20">
       <div className="px-8 md:w-3/5 md:mx-auto">
         {step === 1 && (
-          <div className="space-y-10">
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "-100%" }}
+            transition={{ duration: 0.3 }}
+            className="space-y-10"
+          >
             <h1 className="text-4xl font-semibold"> 📑 New FlashCard Set</h1>
             <p className="text-xl font-light mt-4 leading-8">
               Ready to share your flashcard set with the world? You came to the
@@ -170,27 +246,34 @@ const NewCard = () => {
                 readOnly
               />
             </div>
-          </div>
+          </motion.div>
         )}
 
         {step === 2 && (
-          <div className="space-y-10">
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "-100%" }}
+            transition={{ duration: 0.3 }}
+            className="space-y-10"
+          >
             <h1 className="text-4xl font-semibold">
               {" "}
               📊 What category does your card set belong to?{" "}
             </h1>
             <p className="text-xl font-light mt-4 leading-8">
-              Choose at most 3 categories that best fit your card set. This will
-              help people discover your work.
+              Choose at least 3 categories that best fit your card set. This
+              will help people discover your work.
             </p>
             <div className="mt-10">
               <h2 className="font-medium">Select Categories</h2>
               <div className="grid grid-cols-4 gap-2 pt-4 items-center justify-center">
                 {categories.map((category, index) => (
-                  <div
+                  <motion.div
                     key={index}
                     className="flex border rounded-full"
                     onClick={() => handleCategoryToggle(category)}
+                    whileTap={{ scale: 0.9 }}
                   >
                     <div
                       className={`text-xs md:text-sm p-2 cursor-pointer w-full text-center ${
@@ -201,20 +284,25 @@ const NewCard = () => {
                     >
                       {category}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {step === 3 && (
-          <div className="space-y-10">
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "-100%" }}
+            transition={{ duration: 0.3 }}
+            className="space-y-10"
+          >
             <h1 className="text-4xl font-semibold"> 📝 Card Set Details </h1>
             <p className="text-xl font-light mt-4 leading-8">
               Provide a simple and clear description of your card set. This will
-              help us generate accurate flashcards and ensure people can easily
-              grasp its purpose.
+              ensure people can easily grasp its purpose.
             </p>
             <div className="mt-20">
               <h2 className="font-medium">Headline</h2>
@@ -241,11 +329,17 @@ const NewCard = () => {
                 {shortDescription.length} / 300
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {step === 4 && (
-          <div className="space-y-10">
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "-100%" }}
+            transition={{ duration: 0.3 }}
+            className="space-y-10"
+          >
             <h1 className="text-4xl font-semibold">
               {" "}
               📚 Generated Flashcards{" "}
@@ -254,12 +348,19 @@ const NewCard = () => {
               Based on the information provided, here are your generated
               flashcards. You can review and edit them if needed.
             </p>
-            <Flashcards setFlashcardsInParent={setFlashcards} /> {/* Integrating the Flashcards component here */}
-          </div>
+            <Flashcards setFlashcardsInParent={setFlashcards} />{" "}
+            {/* Integrating the Flashcards component here */}
+          </motion.div>
         )}
 
         {step === 5 && (
-          <div className="space-y-10">
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "-100%" }}
+            transition={{ duration: 0.3 }}
+            className="space-y-10"
+          >
             <h1 className="text-4xl font-semibold"> 🔍 Review and submit</h1>
             <p className="text-xl font-light mt-4 leading-8">
               Review the details of your card set and submit it to the world.
@@ -267,45 +368,70 @@ const NewCard = () => {
             <div className="mt-10 grid grid-cols-2 gap-8">
               <div className="">
                 <div className="font-semibold">Name of the card set</div>
-                <div className=" mt-2 text-gray-600">{name}</div>
+                <div className="mt-2 text-gray-600">{name}</div>
               </div>
 
               <div className="">
                 <div className="font-semibold">Slug ( URL ) </div>
-                <div className=" mt-2 text-gray-600">{slug}</div>
+                <div className="mt-2 text-gray-600">{slug}</div>
               </div>
 
               <div className="">
                 <div className="font-semibold">Category</div>
-                <div className="  mt-2 text-gray-600">
+                <div className="mt-2 text-gray-600">
                   {selectedCategories.join(", ")}
                 </div>
               </div>
               <div className="">
                 <div className="font-semibold">Headline</div>
-                <div className="  mt-2 text-gray-600">{headline}</div>
+                <div className="mt-2 text-gray-600">{headline}</div>
               </div>
               <div className="">
                 <div className="font-semibold">Short description</div>
-                <div className=" mt-2 text-gray-600 ">{shortDescription}</div>
+                <div className="mt-2 text-gray-600">{shortDescription}</div>
               </div>
-              {/* Here we also need to add the ai-generated flashcards */}
             </div>
-          </div>
+
+            {/* Displaying the generated flashcards */}
+            <div>
+              <h2 className="font-semibold">Generated Flashcards</h2>
+              <div className="mt-4 space-y-4">
+                {flashcards.map((flashcard, index) => (
+                  <div
+                    key={index}
+                    className="border p-4 rounded-md shadow-md bg-white"
+                  >
+                    <p className="font-semibold">Flashcard {index + 1}</p>
+                    <p>
+                      <strong>Front:</strong> {flashcard.front}
+                    </p>
+                    <p>
+                      <strong>Back:</strong> {flashcard.back}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         )}
 
         {step === 6 && (
-          <div className="space-y-10">
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "-100%" }}
+            transition={{ duration: 0.3 }}
+            className="space-y-10"
+          >
             <div className="text-4xl font-semibold"> Congratulations 🎉 </div>
-            <div className="text-xl font-light mt-4 leading-8 ">
+            <div className="text-xl font-light mt-4 leading-8">
               Your card set has been successfully added to your collection
             </div>
 
-            <div className="flex flex-col  gap-4">
+            <div className="flex flex-col gap-4">
               <div
                 onClick={handleGoToCards}
-                className="bg-[#ff6154] text-white py-2 px-4
-               rounded mt-4 flex w-60 justify-center items-center cursor-pointer"
+                className="bg-[#ff6154] text-white py-2 px-4 rounded mt-4 flex w-60 justify-center items-center cursor-pointer"
               >
                 Go to your collection
               </div>
@@ -314,13 +440,12 @@ const NewCard = () => {
 
               <div
                 onClick={submitAnotherCard}
-                className="text-[#ff6154] py-2 px-4 rounded mt-4 
-              flex w-60 justify-center items-center cursor-pointer"
+                className="text-[#ff6154] py-2 px-4 rounded mt-4 flex w-60 justify-center items-center cursor-pointer"
               >
                 Start another Card set
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {step !== 6 && (

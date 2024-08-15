@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Logo from "./logo";
 import Search from "./search";
 import Menu from "./menu";
@@ -12,14 +12,36 @@ import NotificationIcon from "./notification-icon";
 import Submit from "./submit";
 
 interface NavbarProps {
-  authenticatedUser?:any
+  initialAuthenticatedUser?: any;
 }
-const Navbar:React.FC<NavbarProps> = ({authenticatedUser}) => {
-  const [authModalVisible, setAuthModalVisible] = useState(false);
 
-  const handleButtonClick = () => {
-    setAuthModalVisible(true);
-  };
+const Navbar: React.FC<NavbarProps> = ({ initialAuthenticatedUser }) => {
+  const [authModalVisible, setAuthModalVisible] = useState(false);
+  const [authenticatedUser, setAuthenticatedUser] = useState(initialAuthenticatedUser);
+  const [hydrated, setHydrated] = useState(false); // New state to track hydration
+
+  useEffect(() => {
+    setHydrated(true); // Mark hydration as complete
+    setAuthenticatedUser(initialAuthenticatedUser); // Sync authenticated user after hydration
+  }, [initialAuthenticatedUser]);
+
+  if (!hydrated) {
+    // Render a loading state or a placeholder to avoid mismatch during hydration
+    return (
+      <div className="border-b py-2 md:py-0 px-4 md:px-6">
+        <div className="flex items-center justify-between">
+          <Logo />
+          <div className="h-8 w-full" /> {/* Placeholder for content */}
+          <div className="flex items-center space-x-6 cursor-pointer text-sm">
+            {/* Placeholder buttons */}
+            <div className="h-6 w-16 bg-gray-200 rounded"></div>
+            <div className="h-6 w-16 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="border-b py-2 md:py-0 px-4 md:px-6">
       <div className="flex items-center justify-between">
@@ -31,22 +53,21 @@ const Navbar:React.FC<NavbarProps> = ({authenticatedUser}) => {
           <Menu />
         </div>
         <div className="flex items-center text-sm space-x-6 cursor-pointer">
-          {authenticatedUser? (
+          {authenticatedUser ? (
             <>
-            <Submit/>
-            <NotificationIcon/>
-            <Avatar authenticatedUser={authenticatedUser}/>
+              <Submit />
+              <NotificationIcon />
+              <Avatar authenticatedUser={authenticatedUser} />
             </>
-          ):(
-        <div onClick={handleButtonClick} className="flex items-center space-x-6 cursor-pointer text-sm">
-          <SignInButton />
-          <SignUpButton />
-        </div>
-        )}
-
+          ) : (
+            <div onClick={() => setAuthModalVisible(true)} className="flex items-center space-x-6 cursor-pointer text-sm">
+              <SignInButton />
+              <SignUpButton />
+            </div>
+          )}
         </div>
         <Modal visible={authModalVisible} setVisible={setAuthModalVisible}>
-          <AuthContent/>
+          <AuthContent />
         </Modal>
       </div>
     </div>

@@ -2,17 +2,8 @@
 
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { FlashcardCollection, FlashcardData } from "@/types";
 
-interface FlashcardData {
-  name: string;
-  slug: string;
-  headline: string;
-  description: string;
-  front: string; // Added front content of the flashcard
-  back: string; // Added back content of the flashcard
-  category: string[];
-  rank?: number;
-}
 
 export const createFlashcard = async ({
   name,
@@ -60,6 +51,60 @@ export const createFlashcard = async ({
     });
 
     return flashcard;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export const createFlashcardCollection = async ({
+  name,
+  slug,
+  headline,
+  description,
+  flashcards, // Array of flashcards
+  category,
+}: FlashcardCollection): Promise<any> => {
+  try {
+    const authenticatedUser = await auth();
+
+    if (!authenticatedUser) {
+      throw new Error("You must be signed in to create a flashcard collection");
+    }
+
+    const userId = authenticatedUser.user?.id;
+
+    const flashcardCollection = await db.flashcardCollection.create({
+      data: {
+        name,
+        slug,
+        headline,
+        description,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        flashcards: {
+          create: flashcards.map((flashcard) => ({
+            name: flashcard.name,
+            slug: flashcard.slug,
+            headline: flashcard.headline,
+            description: flashcard.description,
+            front: flashcard.front,
+            back: flashcard.back,
+          })),
+        },
+        categories: {
+          connectOrCreate: category.map((name:string) => ({
+            where: { name },
+            create: { name },
+          })),
+        },
+      },
+    });
+
+    return flashcardCollection;
   } catch (error) {
     console.error(error);
     return null;

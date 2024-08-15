@@ -276,8 +276,7 @@ const NewCard = () => {
           <div className="space-y-10">
             <div className="text-4xl font-semibold"> Congratulations 🎉 </div>
             <div className="text-xl font-light mt-4 leading-8 ">
-              Your product has been successfully submitted. Our team will review
-              it and get back to you soon.
+              Your card set has been successfully added to your collection
             </div>
 
             <div className="flex flex-col  gap-4">
@@ -286,7 +285,7 @@ const NewCard = () => {
                 className="bg-[#ff6154] text-white py-2 px-4
                rounded mt-4 flex w-60 justify-center items-center cursor-pointer"
               >
-                Go to your products
+                Go to your collection
               </div>
 
               <Separator />
@@ -296,7 +295,7 @@ const NewCard = () => {
                 className="text-[#ff6154] py-2 px-4 rounded mt-4 
               flex w-60 justify-center items-center cursor-pointer"
               >
-                Submit another product
+                Submit another Card set
               </div>
             </div>
           </div>

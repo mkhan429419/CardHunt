@@ -15,7 +15,7 @@ const Menu = () => {
         <Link href={"/"} className="hover:text-[#ff6154]">
           Home
         </Link>
-        <Link href={"/flashcards"} className="hover:text-[#ff6154]">
+        <Link href={"/my-collections"} className="hover:text-[#ff6154]">
           Flashcards
         </Link>
         <Link href={"/categories"} className="hover:text-[#ff6154]">

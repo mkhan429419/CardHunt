@@ -1,20 +1,24 @@
-import { auth } from "@/auth"
-import Navbar from "@/components/navbar/navbar"
+// app/pages/home-layout.tsx
+import { auth } from "@/auth";
+import Navbar from "@/components/navbar/navbar";
 
-const HomeLayout=async({
-    children
-}: Readonly<{children: React.ReactNode}>)=>{
-    //get the authenticated user from server
-    const authenticatedUser=await auth()
+export const metadata = {
+  title: "Your App",
+};
 
-    return (
-        <html lang="en">
-            <body>
-                <Navbar authenticatedUser={authenticatedUser}/>
-                {children}
-            </body>
-        </html>
-    )
+export default async function HomeLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  // Fetch the authenticated user from the server
+  const authenticatedUser = await auth();
+
+  return (
+    <html lang="en">
+      <body>
+        {/* Passing user data to Navbar */}
+        <Navbar initialAuthenticatedUser={authenticatedUser} />
+        {children}
+      </body>
+    </html>
+  );
 }
-
-export default HomeLayout

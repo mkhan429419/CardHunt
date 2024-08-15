@@ -1,24 +1,25 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -37,47 +38,28 @@ model User {
   id            String    @id @default(cuid())
   image         String
   name          String
-  email         String  @unique
+  email         String    @unique
   emailVerified DateTime?
 
-  isPremium     Boolean @default(false)
+  isPremium     Boolean        @default(false)
   notifications Notification[]
   upvotes       Upvote[]
   accounts      Account[]
   sessions      Session[]
-  flashcards    Flashcard[]  // Changed from "products"
+  flashcards    Flashcard[]
   comments      Comment[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt 
+
+  flashcardCollections FlashcardCollection[] // Add this line
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Category {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  flashcards  Flashcard[] // Changed from "products"
+  id                   String                @id @default(cuid())
+  name                 String                @unique
+  flashcardCollections FlashcardCollection[] @relation("FlashcardCollectionCategories")
 }
-
-model Flashcard {
-  id          String     @id @default(cuid())
-  name        String
-  slug        String     @unique
-  headline    String
-  rank        Int
-  description String
-  front       String     // Field to store the front content of the flashcard
-  back        String     // Field to store the back content of the flashcard
-  notification Notification[] 
-  comments    Comment[]
-  upvotes     Upvote[]
-  categories  Category[] // Many-to-many relation with Category
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  user        User       @relation(fields: [userId], references: [id])
-  userId      String
-
-  @@index([userId])
-}
-
 
 model Upvote {
   id          String    @id @default(cuid())
@@ -102,18 +84,18 @@ model Comment {
 }
 
 model Notification {
-  id             String   @id @default(cuid())
+  id             String             @id @default(cuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id])
+  user           User               @relation(fields: [userId], references: [id])
   body           String
   profilePicture String
   flashcardId    String
-  flashcard      Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade) // Changed from "product"
+  flashcard      Flashcard          @relation(fields: [flashcardId], references: [id], onDelete: Cascade) // Changed from "product"
   commentId      String?
   type           NotificationType
   status         NotificationStatus @default(UNREAD)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 }
 
 enum NotificationStatus {
@@ -124,4 +106,34 @@ enum NotificationStatus {
 enum NotificationType {
   UPVOTE
   COMMENT
+}
+
+model Flashcard {
+  id                    String              @id @default(cuid())
+  front                 String // Front content of the flashcard
+  back                  String // Back content of the flashcard
+  flashcardCollection   FlashcardCollection @relation(fields: [flashcardCollectionId], references: [id], onDelete: Cascade)
+  flashcardCollectionId String // Foreign key to FlashcardCollection
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  User         User?          @relation(fields: [userId], references: [id])
+  userId       String?
+  Upvote       Upvote[]
+  Comment      Comment[]
+  Notification Notification[]
+}
+
+model FlashcardCollection {
+  id          String      @id
+  name        String
+  slug        String      @unique
+  headline    String
+  description String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  flashcards  Flashcard[] // One-to-many relation with Flashcard
+  categories  Category[]  @relation("FlashcardCollectionCategories") // Many-to-many relation with Category
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }

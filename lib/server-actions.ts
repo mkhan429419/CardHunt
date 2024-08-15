@@ -1,65 +1,70 @@
-"use server";
-
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { FlashcardData } from "@/types";
+import { FlashcardCollection } from "@prisma/client";
+import { db } from "./db";
 
-interface FlashcardData {
-  name: string;
-  slug: string;
-  headline: string;
-  description: string;
-  front: string; // Added front content of the flashcard
-  back: string; // Added back content of the flashcard
-  category: string[];
-  rank?: number;
-}
-
-export const createFlashcard = async ({
+export const createFlashcardCollection = async ({
+  id,
   name,
   slug,
   headline,
   description,
-  front,
-  back,
-  category, rank = 0
-}: FlashcardData): Promise<any> => {
+  categories,
+  flashcards,
+}: {
+  id:string;
+  name: string;
+  slug: string;
+  headline: string;
+  description: string;
+  categories: string[];
+  flashcards: FlashcardData[];
+}): Promise<FlashcardCollection | null> => {
   try {
     const authenticatedUser = await auth();
 
     if (!authenticatedUser) {
-      throw new Error("You must be signed in to create a flashcard");
+      throw new Error("You must be signed in to create a flashcard collection");
     }
 
     const userId = authenticatedUser.user?.id;
 
-    const flashcard = await db.flashcard.create({
+    if (!userId) {
+      throw new Error("User ID is not available");
+    }
+
+    const flashcardCollection = await db.flashcardCollection.create({
       data: {
+        id,
         name,
         slug,
         headline,
         description,
-        front, // Save the front content
-        back, // Save the back content
-        rank: rank || 0, // Default rank to 0 if not provided
-        categories: {
-          connectOrCreate: category.map((name) => ({
-            where: {
-              name,
-            },
-            create: {
-              name,
-            },
-          })),
-        },
         user: {
           connect: {
             id: userId,
           },
         },
+        flashcards: {
+          create: flashcards.map((flashcard) => ({
+            front: flashcard.front,
+            back: flashcard.back,
+          })),
+        },
+        categories: {
+          connectOrCreate: categories.map((category) => ({
+            where: { name: category }, // Adjust based on how categories are stored
+            create: { name: category },
+          })),
+        },
+      },
+      include: {
+        flashcards: true,
+        categories: true,
       },
     });
 
-    return flashcard;
+    return flashcardCollection;
   } catch (error) {
     console.error(error);
     return null;

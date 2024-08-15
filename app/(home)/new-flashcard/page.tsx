@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { createFlashcardCollection } from "@/lib/server-actions";
 import { FlashcardContent } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
+import Link from "next/link";
 // DONT USE categories with spaces
 const categories = [
   "Media",
@@ -83,9 +84,7 @@ const NewCard = () => {
     setStep(step - 1);
   }, [step]);
 
-  const handleGoToCards = () => {
-    window.location.href = "/my-cards";
-  };
+ 
   const submitAnotherCard = () => {
     setStep(1);
     setName("");
@@ -136,7 +135,7 @@ const NewCard = () => {
  
 
   return (
-    <div className="flex items-center justify-center py-8 md:py-20">
+    <div className="flex items-center justify-center py-8 md:py-20 w-full">
       <div className="px-8 md:w-3/5 md:mx-auto">
         {step === 1 && (
           <div className="space-y-10">
@@ -248,13 +247,15 @@ const NewCard = () => {
           <div className="space-y-10">
             <h1 className="text-4xl font-semibold">
               {" "}
-              📚 Generated Flashcards{" "}
+              📚 Generate Flashcards{" "}
             </h1>
             <p className="text-xl font-light mt-4 leading-8">
-              Based on the information provided, here are your generated
-              flashcards. You can review and edit them if needed.
+              Enter a topic below and click generate to generate a set 0f 10 flashcards. Want to increase 
+              the limit? Join our premium version <span className="text-blue-400 underline">here</span>
             </p>
+            <div className="w-full">
             <Flashcards setFlashcardsInParent={setFlashcards} /> {/* Integrating the Flashcards component here */}
+            </div>
           </div>
         )}
 
@@ -302,13 +303,13 @@ const NewCard = () => {
             </div>
 
             <div className="flex flex-col  gap-4">
-              <div
-                onClick={handleGoToCards}
+              <Link
+                href="my-collections"
                 className="bg-[#ff6154] text-white py-2 px-4
                rounded mt-4 flex w-60 justify-center items-center cursor-pointer"
               >
-                Go to your collection
-              </div>
+                Browse your collections
+              </Link>
 
               <Separator />
 

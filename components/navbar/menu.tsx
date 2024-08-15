@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LaunchesMenu from "./menus/launches-menu";
 import Link from "next/link";
 import AboutMenu from "./menus/about-menu";
+import { auth } from "@/auth";
 
-const Menu = () => {
+
+interface menuProps{
+  authenticatedUser?:any
+}
+const Menu: React.FC<menuProps> = ({authenticatedUser}) => {
   const [showLaunchesMenu, setShowLaunchesMenu] = useState(false);
   const [showAboutMenu, setShowAboutMenu] = useState(false);
+
+  
 
   return (
     <div className="hidden lg:flex items-center relative">
@@ -15,9 +22,10 @@ const Menu = () => {
         <Link href={"/"} className="hover:text-[#ff6154]">
           Home
         </Link>
-        <Link href={"/my-collections"} className="hover:text-[#ff6154]">
+        {authenticatedUser &&  <Link href={"/my-collections"} className="hover:text-[#ff6154]">
           Flashcards
-        </Link>
+        </Link> }
+      
         <Link href={"/categories"} className="hover:text-[#ff6154]">
           Categories
         </Link>

@@ -23,14 +23,15 @@ export type FlashcardContent = {
     flashcardCollectionId: string;
   }
   
-  export interface FlashcardCollection {
+
+export interface FlashcardCollection {
     id: string;
+    userId: string;
     name: string;
     slug: string;
     headline: string;
     description: string;
-    categories: Category[]; // List of categories associated with the collection
-    userId: string;
+    categories: string[]; // Assuming categories are strings
     flashcards: FlashcardData[];
     createdAt: Date;
     updatedAt: Date;

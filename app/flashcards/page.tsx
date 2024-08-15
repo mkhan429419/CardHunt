@@ -8,9 +8,12 @@ import { FlashcardContent } from '@/types';
 import { toast } from "sonner"
 
 
-type Props = {};
+type Props = {
+  setFlashcardsInParent: React.Dispatch<React.SetStateAction<FlashcardContent[]>>; // Accept setFlashcards as a prop
+};
 
-const Flashcards = (props: Props) => {
+
+const Flashcards = ({ setFlashcardsInParent }: Props) => {
  const [flashcards, setFlashcards] = useState<FlashcardContent[]>([]);
  const [topic, setTopic] = useState<string>("");
  const [loading, setLoading] = useState(false);
@@ -26,6 +29,7 @@ const Flashcards = (props: Props) => {
       const data = await generateFlashcards(topic);
       if (data) {
         setFlashcards(data);
+        setFlashcardsInParent(data);
       } else {
     toast.error('No flashcards data received');
       }

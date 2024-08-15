@@ -3,8 +3,9 @@
 import React, { useCallback, useState } from "react";
 import Flashcards from "@/app/flashcards/page"; // Import the Flashcards component
 import { Separator } from "@/components/ui/separator";
-import { createFlashcard } from "@/lib/server-actions";
-
+import { createFlashcardCollection } from "@/lib/server-actions";
+import { FlashcardContent } from "@/types";
+import { v4 as uuidv4 } from 'uuid';
 // DONT USE categories with spaces
 const categories = [
   "Media",
@@ -43,6 +44,7 @@ const NewCard = () => {
   const [headline, setHeadline] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [flashcards, setFlashcards] = useState<FlashcardContent[]>([]);
 
   const handleHeadlineChange = (e: any) => {
     const headlineText = e.target.value.slice(0, 70);
@@ -93,25 +95,45 @@ const NewCard = () => {
     setSelectedCategories([]);
   };
 
-  const submitCard = async () => {
-    setLoading(true);
 
+   const submitCard=async()=> {
+    console.log('flashcards in parent: ',flashcards)
+    const flashcardCollectionId= uuidv4()
     try {
-      await createFlashcard({
-        name,
-        slug,
-        headline,
-        description: shortDescription,
-        front: "Default front content", // Placeholder for front content
-        back: "Default back content", // Placeholder for back content
-        category: selectedCategories,
+      const response = await fetch('/api/create-flashcard-collection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: flashcardCollectionId,
+          name,
+          slug,
+          headline,
+          description: shortDescription,
+          categories: selectedCategories,
+          flashcards: flashcards.map((flashcard: { front: any; back: any;id:string }) => ({
+            flashcardCollectionId: flashcardCollectionId,
+            front: flashcard.front,
+            back: flashcard.back,
+            id: flashcard.id
+          })),
+        }),
       });
+  
+      if (!response.ok) {
+        throw new Error('Failed to create flashcard collection');
+      }
+  
+      const data = await response.json();
+      console.log("Flashcard collection created:", data);
       setStep(6);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setLoading(false);
     }
-  };
+  }
+ 
 
   return (
     <div className="flex items-center justify-center py-8 md:py-20">
@@ -232,7 +254,7 @@ const NewCard = () => {
               Based on the information provided, here are your generated
               flashcards. You can review and edit them if needed.
             </p>
-            <Flashcards /> {/* Integrating the Flashcards component here */}
+            <Flashcards setFlashcardsInParent={setFlashcards} /> {/* Integrating the Flashcards component here */}
           </div>
         )}
 
@@ -295,7 +317,7 @@ const NewCard = () => {
                 className="text-[#ff6154] py-2 px-4 rounded mt-4 
               flex w-60 justify-center items-center cursor-pointer"
               >
-                Submit another Card set
+                Start another Card set
               </div>
             </div>
           </div>
@@ -316,7 +338,7 @@ const NewCard = () => {
                     onClick={submitCard}
                     className="bg-[#ff6154] text-white py-2 px-4 rounded-md mt-4 items-end"
                   >
-                    Submit
+                    Save
                   </button>
                 ) : (
                   <button

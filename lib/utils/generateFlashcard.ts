@@ -47,7 +47,6 @@ export async function generateFlashcards(topic: string, count: number = 10): Pro
         const back = match[2].trim();
         flashcards.push({    id: uuidv4(),front, back });
       }
-console.log('flashcards:', flashcards);
       return flashcards;
     } else {
       console.error('Error generating flashcard content:', data);

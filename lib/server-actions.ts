@@ -54,7 +54,7 @@ export const createFlashcardCollection = async ({
         },
         categories: {
           connectOrCreate: categories.map((category) => ({
-            where: { name: category }, // Adjust based on how categories are stored
+            where: { name: category },
             create: { name: category },
           })),
         },
@@ -62,6 +62,7 @@ export const createFlashcardCollection = async ({
       include: {
         flashcards: true,
         categories: true,
+        upvotes: true,
       },
     });
 
@@ -88,6 +89,7 @@ export const getOwnerFlashcardCollections = async () => {
     include: {
       flashcards: true,
       categories: true,
+      upvotes: true,
     },
   });
 
@@ -102,26 +104,24 @@ export const getFlashcardCollectionById = async (collectionId: string) => {
       },
       include: {
         categories: true,
-        flashcards: {
+        flashcards: true,
+        upvotes: {
           include: {
-            Comment: {
-              include: {
-                user: true,
-              },
-            },
-            Upvote: {
-              include: {
-                user: true,
-              },
-            },
+            user: true,
           },
         },
+        comments: {
+          include: {
+            user: true,
+          },
+        },
+        user: true, // Ensure to include the user details
       },
     });
 
     return flashcardCollection;
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching flashcard collection:", error);
     return null;
   }
 };
@@ -138,37 +138,27 @@ export const getRankById = async (): Promise<
     select: {
       id: true,
       name: true,
-      flashcards: {
+      upvotes: {
         select: {
-          Upvote: {
-            select: {
-              id: true,
-            },
-          },
+          id: true,
         },
       },
     },
   });
 
-  // Find the maximum number of upvotes among all collections
   const maxUpvotes =
     rankedCollections.length > 0
-      ? rankedCollections[0].flashcards.reduce(
-          (acc: number, flashcard) => acc + flashcard.Upvote.length,
-          0
+      ? Math.max(
+          ...rankedCollections.map((collection) => collection.upvotes.length)
         )
       : 0;
 
-  // Assign ranks to each collection based on their number of upvotes
   const collectionsWithRanks = rankedCollections.map((collection, index) => {
-    const totalUpvotes = collection.flashcards.reduce(
-      (acc: number, flashcard) => acc + flashcard.Upvote.length,
-      0
-    );
+    const totalUpvotes = collection.upvotes.length;
     return {
       id: collection.id,
       name: collection.name,
-      upvotes: collection.flashcards.flatMap((flashcard) => flashcard.Upvote),
+      upvotes: collection.upvotes,
       rank: totalUpvotes === maxUpvotes ? 1 : index + 2,
     };
   });
@@ -225,6 +215,7 @@ export const updateFlashcardCollection = async (
       include: {
         flashcards: true,
         categories: true,
+        upvotes: true,
       },
     });
 
@@ -274,10 +265,8 @@ export const deleteFlashcardCollection = async (collectionId: string) => {
 export const getUserTotalUpvotes = async (userId: string) => {
   const totalUpvotes = await db.upvote.count({
     where: {
-      flashcard: {
-        flashcardCollection: {
-          userId,
-        },
+      flashcardCollection: {
+        userId,
       },
     },
   });
@@ -288,10 +277,8 @@ export const getUserTotalUpvotes = async (userId: string) => {
 export const getUserTotalComments = async (userId: string) => {
   const totalComments = await db.comment.count({
     where: {
-      flashcard: {
-        flashcardCollection: {
-          userId,
-        },
+      flashcardCollection: {
+        userId,
       },
     },
   });
@@ -299,46 +286,25 @@ export const getUserTotalComments = async (userId: string) => {
   return totalComments;
 };
 
-export const getUserRecentActivity = async (userId: string) => {
-  const recentActivity = await db.notification.findMany({
-    where: {
-      userId,
-    },
-    include: {
-      user: true,
-      flashcard: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 10, // Limit to recent 10 activities
-  });
-
-  return recentActivity;
-};
-
 export const getAllFlashcardCollections = async () => {
   const flashcardCollections = await db.flashcardCollection.findMany({
     include: {
       categories: true,
-      flashcards: {
+      flashcards: true,
+      upvotes: {
         include: {
-          Comment: {
-            include: {
-              user: true,
-            },
-          },
-          Upvote: {
-            include: {
-              user: true,
-            },
-          },
+          user: true,
         },
       },
-      user: true, // Ensure the user relation is included here
+      comments: {
+        include: {
+          user: true,
+        },
+      },
+      user: true,
     },
     orderBy: {
-      flashcards: {
+      upvotes: {
         _count: "desc",
       },
     },
@@ -351,64 +317,38 @@ export const upvoteFlashcardCollection = async (collectionId: string) => {
   try {
     const authenticatedUser = await auth();
 
-    if (
-      !authenticatedUser ||
-      !authenticatedUser.user ||
-      !authenticatedUser.user.id
-    ) {
+    if (!authenticatedUser?.user?.id) {
       throw new Error("User ID is missing or invalid");
     }
 
     const userId = authenticatedUser.user.id;
 
-    const upvote = await db.upvote.findFirst({
+    // Check if the user has already upvoted the collection
+    const existingUpvote = await db.upvote.findFirst({
       where: {
-        flashcardId: collectionId,
+        flashcardCollectionId: collectionId,
         userId,
       },
     });
 
-    const profilePicture = authenticatedUser.user.image || ""; // Use an empty string if profile picture is undefined
-
-    if (upvote) {
+    if (existingUpvote) {
+      // User has already upvoted, so remove the upvote
       await db.upvote.delete({
-        where: {
-          id: upvote.id,
-        },
+        where: { id: existingUpvote.id },
       });
     } else {
+      // User has not upvoted yet, so create an upvote
       await db.upvote.create({
         data: {
-          flashcardId: collectionId,
+          flashcardCollectionId: collectionId,
           userId,
         },
       });
-
-      const collectionOwner = await db.flashcardCollection.findUnique({
-        where: {
-          id: collectionId,
-        },
-        select: {
-          userId: true,
-        },
-      });
-
-      // notify the flashcard collection owner about the upvote
-
-      if (collectionOwner && collectionOwner.userId !== userId) {
-        await db.notification.create({
-          data: {
-            userId: collectionOwner.userId,
-            body: `Upvoted your flashcard collection`,
-            profilePicture: profilePicture,
-            flashcardId: collectionId,
-            type: "UPVOTE",
-            status: "UNREAD",
-          },
-        });
-      }
     }
-    return true;
+
+    // Return the updated collection data with upvotes and user info
+    const updatedCollection = await getFlashcardCollectionById(collectionId);
+    return updatedCollection;
   } catch (error) {
     console.error("Error upvoting flashcard collection:", error);
     throw error;
@@ -432,46 +372,13 @@ export const commentOnFlashcardCollection = async (
 
     const userId = authenticatedUser.user.id;
 
-    // Check if authenticated user has a profile picture
-    const profilePicture = authenticatedUser.user.image || ""; // Use an empty string if profile picture is undefined
-
     await db.comment.create({
       data: {
-        createdAt: new Date(),
-        flashcardId: collectionId,
+        flashcardCollectionId: collectionId,
         userId,
         body: commentText,
-        profilePicture: profilePicture,
-      },
-      include: {
-        user: true,
       },
     });
-
-    const collectionDetails = await db.flashcardCollection.findUnique({
-      where: {
-        id: collectionId,
-      },
-      select: {
-        userId: true,
-        name: true, // Include the collection name in the query
-      },
-    });
-
-    // Check if the commenter is not the owner of the flashcard collection
-    if (collectionDetails && collectionDetails.userId !== userId) {
-      // Notify the collection owner about the comment
-      await db.notification.create({
-        data: {
-          userId: collectionDetails.userId,
-          body: `Commented on your flashcard collection "${collectionDetails.name}"`,
-          profilePicture: profilePicture,
-          flashcardId: collectionId,
-          type: "COMMENT",
-          status: "UNREAD",
-        },
-      });
-    }
   } catch (error) {
     console.error("Error commenting on flashcard collection:", error);
     throw error;

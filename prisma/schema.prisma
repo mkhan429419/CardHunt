@@ -42,14 +42,13 @@ model User {
   emailVerified DateTime?
 
   isPremium     Boolean        @default(false)
-  notifications Notification[]
   upvotes       Upvote[]
   accounts      Account[]
   sessions      Session[]
   flashcards    Flashcard[]
   comments      Comment[]
 
-  flashcardCollections FlashcardCollection[] // Add this line
+  flashcardCollections FlashcardCollection[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -62,66 +61,37 @@ model Category {
 }
 
 model Upvote {
-  id          String    @id @default(cuid())
-  flashcardId String
-  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade) // Changed from "product"
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                    String               @id @default(cuid())
+  flashcardCollectionId String               // Foreign key to FlashcardCollection
+  flashcardCollection   FlashcardCollection  @relation(fields: [flashcardCollectionId], references: [id], onDelete: Cascade, name: "UpvotesOnCollection")
+  userId                String
+  user                  User                 @relation(fields: [userId], references: [id])
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 }
 
 model Comment {
-  id             String    @id @default(cuid())
-  profilePicture String
-  flashcardId    String
-  flashcard      Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade) // Changed from "product"
-  userId         String
-  user           User      @relation(fields: [userId], references: [id])
-  body           String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-}
-
-model Notification {
-  id             String             @id @default(cuid())
-  userId         String
-  user           User               @relation(fields: [userId], references: [id])
-  body           String
-  profilePicture String
-  flashcardId    String
-  flashcard      Flashcard          @relation(fields: [flashcardId], references: [id], onDelete: Cascade) // Changed from "product"
-  commentId      String?
-  type           NotificationType
-  status         NotificationStatus @default(UNREAD)
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
-}
-
-enum NotificationStatus {
-  UNREAD
-  READ
-}
-
-enum NotificationType {
-  UPVOTE
-  COMMENT
+  id                    String               @id @default(cuid())
+  flashcardCollectionId String               // Foreign key to FlashcardCollection
+  flashcardCollection   FlashcardCollection  @relation(fields: [flashcardCollectionId], references: [id], onDelete: Cascade, name: "CommentsOnCollection")
+  userId                String
+  user                  User                 @relation(fields: [userId], references: [id])
+  body                  String
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 }
 
 model Flashcard {
   id                    String              @id @default(cuid())
-  front                 String // Front content of the flashcard
-  back                  String // Back content of the flashcard
+  front                 String              // Front content of the flashcard
+  back                  String              // Back content of the flashcard
   flashcardCollection   FlashcardCollection @relation(fields: [flashcardCollectionId], references: [id], onDelete: Cascade)
-  flashcardCollectionId String // Foreign key to FlashcardCollection
+  flashcardCollectionId String              // Foreign key to FlashcardCollection
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  User         User?          @relation(fields: [userId], references: [id])
+  user         User?          @relation(fields: [userId], references: [id])
   userId       String?
-  Upvote       Upvote[]
-  Comment      Comment[]
-  Notification Notification[]
 }
 
 model FlashcardCollection {
@@ -134,6 +104,8 @@ model FlashcardCollection {
   userId      String
   flashcards  Flashcard[] // One-to-many relation with Flashcard
   categories  Category[]  @relation("FlashcardCollectionCategories") // Many-to-many relation with Category
+  upvotes     Upvote[]    @relation("UpvotesOnCollection")
+  comments    Comment[]   @relation("CommentsOnCollection")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }

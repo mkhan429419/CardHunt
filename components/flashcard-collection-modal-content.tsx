@@ -9,7 +9,7 @@ import {
   PiUploadSimple,
 } from "react-icons/pi";
 import CarouselComponent from "./carousel-component";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ShareModal from "./ui/modals/share-product-modal";
 import ShareModalContent from "./share-modal-content";
 import {
@@ -18,6 +18,7 @@ import {
   upvoteFlashcardCollection,
 } from "@/lib/server-actions";
 import { Badge } from "./ui/badge";
+import { getFlashcardCollectionById } from "@/lib/server-actions";
 
 interface FlashcardCollectionModalContentProps {
   currentCollection: any;
@@ -39,8 +40,20 @@ const FlashcardCollectionModalContent: React.FC<
   setHasUpvoted,
 }) => {
   const [commentText, setCommentText] = useState("");
-  const [shareModalModalVisible, setShareModalVisible] = useState(false);
-  const [comments, setComments] = useState(currentCollection.commentData || []);
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [comments, setComments] = useState(currentCollection.comments || []);
+
+  useEffect(() => {
+    if (currentCollection) {
+      // Set initial upvote state based on the fetched collection data
+      setTotalUpvotes(currentCollection.upvotes.length);
+      setHasUpvoted(
+        currentCollection.upvotes.some(
+          (upvote: { userId: any; }) => upvote.userId === authenticatedUser.user.id
+        )
+      );
+    }
+  }, [currentCollection, authenticatedUser, setTotalUpvotes, setHasUpvoted]);
 
   const handleShareClick = () => {
     setShareModalVisible(true);
@@ -50,16 +63,16 @@ const FlashcardCollectionModalContent: React.FC<
     try {
       await commentOnFlashcardCollection(currentCollection.id, commentText);
       setCommentText("");
-      setComments([
-        ...comments,
-        {
-          user: authenticatedUser.user.name,
-          body: commentText,
-          profile: authenticatedUser.user.image,
-          userId: authenticatedUser.user.id,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      const updatedCollection = await getFlashcardCollectionById(
+        currentCollection.id
+      );
+
+      if (updatedCollection) {
+        // Null check to ensure updatedCollection is not null
+        setComments(updatedCollection.comments);
+      } else {
+        console.error("Failed to fetch the updated collection data.");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -82,15 +95,25 @@ const FlashcardCollectionModalContent: React.FC<
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.stopPropagation();
-
+  
     try {
-      await upvoteFlashcardCollection(currentCollection.id);
-      setTotalUpvotes(hasUpvoted ? totalUpvotes - 1 : totalUpvotes + 1);
-      setHasUpvoted(!hasUpvoted);
+      const updatedCollection = await upvoteFlashcardCollection(currentCollection.id);
+  
+      if (updatedCollection) {
+        setTotalUpvotes(updatedCollection.upvotes.length);
+        setHasUpvoted(
+          updatedCollection.upvotes.some(
+            (upvote) => upvote.userId === authenticatedUser.user.id
+          )
+        );
+      } else {
+        console.error("Failed to fetch the updated collection data.");
+      }
     } catch (error) {
       console.error("Error upvoting flashcard collection:", error);
     }
   };
+  
 
   return (
     <div className="h-full">
@@ -137,11 +160,11 @@ const FlashcardCollectionModalContent: React.FC<
             <div className="flex gap-x-2">
               {currentCollection.categories.map((category: any) => (
                 <Link
-                  href={`/category/${category.toLowerCase()}`}
-                  key={category}
+                  href={`/category/${category.name.toLowerCase()}`} // Access the `name` property
+                  key={category.id} // Use `id` as the key to ensure uniqueness
                   className="bg-gray-100 text-gray-600 px-4 py-2 rounded-md cursor-pointer"
                 >
-                  {category}
+                  {category.name}
                 </Link>
               ))}
             </div>
@@ -203,7 +226,7 @@ const FlashcardCollectionModalContent: React.FC<
             {comments.map((comment: any) => (
               <div key={comment.id} className="flex gap-4">
                 <Image
-                  src={comment.profile}
+                  src={comment.profilePicture}
                   alt="profile"
                   width={50}
                   height={50}
@@ -214,14 +237,14 @@ const FlashcardCollectionModalContent: React.FC<
                   <div className="flex justify-between items-center">
                     <div className="flex gap-x-2 items-center">
                       <h1 className="text-gray-600 font-semibold cursor-pointer">
-                        {comment.user}
+                        {comment.user.name}
                       </h1>
                       {comment.userId === currentCollection.userId && (
                         <Badge className="bg-[#88aaff]">Creator</Badge>
                       )}
 
                       <div className="text-gray-500 text-xs">
-                        {new Date(comment.timestamp).toDateString()}
+                        {new Date(comment.createdAt).toDateString()}
                       </div>
                     </div>
 
@@ -248,10 +271,7 @@ const FlashcardCollectionModalContent: React.FC<
         </div>
       </div>
 
-      <ShareModal
-        visible={shareModalModalVisible}
-        setVisible={setShareModalVisible}
-      >
+      <ShareModal visible={shareModalVisible} setVisible={setShareModalVisible}>
         <ShareModalContent currentCollection={currentCollection} />
       </ShareModal>
     </div>

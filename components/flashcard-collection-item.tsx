@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PiArrowBendDoubleUpRight,
   PiCaretUpFill,
@@ -15,6 +15,7 @@ import { upvoteFlashcardCollection } from "@/lib/server-actions";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import LogoSmall from "@/public/logo/logo-small.png";
+import { getFlashcardCollectionById } from "@/lib/server-actions";
 
 interface FlashcardCollectionItemProps {
   collection: any;
@@ -34,13 +35,34 @@ const FlashcardCollectionItem: React.FC<FlashcardCollectionItemProps> = ({
   );
 
   const [totalUpvotes, setTotalUpvotes] = useState(collection.upvotes || 0);
+  const [totalComments, setTotalComments] = useState(
+    collection.commentsLength || 0
+  );
 
-  const handleCollectionItemClick = () => {
+  useEffect(() => {
+    setHasUpvoted(collection.upvoters?.includes(authenticatedUser?.user.id));
+    setTotalUpvotes(collection.upvotes);
+    setTotalComments(collection.commentsLength);
+  }, [
+    collection.upvoters,
+    collection.upvotes,
+    collection.commentsLength,
+    authenticatedUser,
+  ]);
+
+  const handleCollectionItemClick = async () => {
     if (!authenticatedUser) {
       setShowLoginModal(true);
     } else {
-      setCurrentCollection(collection);
-      setShowCollectionModal(true);
+      try {
+        const updatedCollection = await getFlashcardCollectionById(
+          collection.id
+        ); // Fetch latest data
+        setCurrentCollection(updatedCollection);
+        setShowCollectionModal(true);
+      } catch (error) {
+        console.error("Error fetching flashcard collection:", error);
+      }
     }
   };
 
@@ -63,11 +85,18 @@ const FlashcardCollectionItem: React.FC<FlashcardCollectionItemProps> = ({
     e.stopPropagation();
 
     try {
-      await upvoteFlashcardCollection(collection.id);
-      setHasUpvoted(!hasUpvoted);
-      setTotalUpvotes(hasUpvoted ? totalUpvotes - 1 : totalUpvotes + 1);
+      const updatedCollection = await upvoteFlashcardCollection(collection.id);
+      if (updatedCollection) {
+        setHasUpvoted(
+          updatedCollection.upvotes.some(
+            (upvote) => upvote.userId === authenticatedUser.user.id
+          )
+        );
+        setTotalUpvotes(updatedCollection.upvotes.length);
+        setTotalComments(updatedCollection.comments.length);
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error upvoting flashcard collection:", error);
     }
   };
 
@@ -75,7 +104,6 @@ const FlashcardCollectionItem: React.FC<FlashcardCollectionItemProps> = ({
     initial: { scale: 1 },
     upvoted: { scale: [1, 1.2, 1], transition: { duration: 0.3 } },
   };
-  console.log(collection.user?.image); // Add this line to check the user data
 
   return (
     <div

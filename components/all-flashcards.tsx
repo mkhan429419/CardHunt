@@ -23,9 +23,9 @@ const AllFlashcards: React.FC<AllFlashcardsProps> = async ({
         userId,
         flashcards,
         categories,
-        comments,
+        comments, // Make sure comments are being accessed correctly
         upvotes,
-        user, // Include the user object here
+        user,
       } = collection;
 
       const commentText = comments
@@ -56,11 +56,11 @@ const AllFlashcards: React.FC<AllFlashcardsProps> = async ({
         userId,
         flashcards,
         categories: categories.map((category: any) => category.name),
-        commentsLength: comments ? comments.length : 0,
+        commentsLength: comments.length, // Ensure commentsLength is set correctly
         commentData: commentText,
         upvoters,
         upvotes: upvotesCount,
-        user, // Pass the user object along
+        user,
       };
     }
   );

@@ -316,3 +316,178 @@ export const getUserRecentActivity = async (userId: string) => {
 
   return recentActivity;
 };
+
+export const getAllFlashcardCollections = async () => {
+  const flashcardCollections = await db.flashcardCollection.findMany({
+    include: {
+      categories: true,
+      flashcards: {
+        include: {
+          Comment: {
+            include: {
+              user: true,
+            },
+          },
+          Upvote: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      },
+      user: true, // Ensure the user relation is included here
+    },
+    orderBy: {
+      flashcards: {
+        _count: "desc",
+      },
+    },
+  });
+
+  return flashcardCollections;
+};
+
+export const upvoteFlashcardCollection = async (collectionId: string) => {
+  try {
+    const authenticatedUser = await auth();
+
+    if (
+      !authenticatedUser ||
+      !authenticatedUser.user ||
+      !authenticatedUser.user.id
+    ) {
+      throw new Error("User ID is missing or invalid");
+    }
+
+    const userId = authenticatedUser.user.id;
+
+    const upvote = await db.upvote.findFirst({
+      where: {
+        flashcardId: collectionId,
+        userId,
+      },
+    });
+
+    const profilePicture = authenticatedUser.user.image || ""; // Use an empty string if profile picture is undefined
+
+    if (upvote) {
+      await db.upvote.delete({
+        where: {
+          id: upvote.id,
+        },
+      });
+    } else {
+      await db.upvote.create({
+        data: {
+          flashcardId: collectionId,
+          userId,
+        },
+      });
+
+      const collectionOwner = await db.flashcardCollection.findUnique({
+        where: {
+          id: collectionId,
+        },
+        select: {
+          userId: true,
+        },
+      });
+
+      // notify the flashcard collection owner about the upvote
+
+      if (collectionOwner && collectionOwner.userId !== userId) {
+        await db.notification.create({
+          data: {
+            userId: collectionOwner.userId,
+            body: `Upvoted your flashcard collection`,
+            profilePicture: profilePicture,
+            flashcardId: collectionId,
+            type: "UPVOTE",
+            status: "UNREAD",
+          },
+        });
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error("Error upvoting flashcard collection:", error);
+    throw error;
+  }
+};
+
+export const commentOnFlashcardCollection = async (
+  collectionId: string,
+  commentText: string
+) => {
+  try {
+    const authenticatedUser = await auth();
+
+    if (
+      !authenticatedUser ||
+      !authenticatedUser.user ||
+      !authenticatedUser.user.id
+    ) {
+      throw new Error("User ID is missing or invalid");
+    }
+
+    const userId = authenticatedUser.user.id;
+
+    // Check if authenticated user has a profile picture
+    const profilePicture = authenticatedUser.user.image || ""; // Use an empty string if profile picture is undefined
+
+    await db.comment.create({
+      data: {
+        createdAt: new Date(),
+        flashcardId: collectionId,
+        userId,
+        body: commentText,
+        profilePicture: profilePicture,
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    const collectionDetails = await db.flashcardCollection.findUnique({
+      where: {
+        id: collectionId,
+      },
+      select: {
+        userId: true,
+        name: true, // Include the collection name in the query
+      },
+    });
+
+    // Check if the commenter is not the owner of the flashcard collection
+    if (collectionDetails && collectionDetails.userId !== userId) {
+      // Notify the collection owner about the comment
+      await db.notification.create({
+        data: {
+          userId: collectionDetails.userId,
+          body: `Commented on your flashcard collection "${collectionDetails.name}"`,
+          profilePicture: profilePicture,
+          flashcardId: collectionId,
+          type: "COMMENT",
+          status: "UNREAD",
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error commenting on flashcard collection:", error);
+    throw error;
+  }
+};
+
+export const deleteComment = async (commentId: string) => {
+  try {
+    await db.comment.delete({
+      where: {
+        id: commentId,
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    throw error;
+  }
+};

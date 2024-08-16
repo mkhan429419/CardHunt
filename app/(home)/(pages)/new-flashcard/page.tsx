@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { PiXCircleFill } from "react-icons/pi";
+import Link from "next/link";
 
 const categories = [
   "Media",
@@ -76,6 +77,9 @@ const NewCard = () => {
     } else if (selectedCategories.length < 3) {
       setSelectedCategories((prevCategories) => [...prevCategories, category]);
     }
+  };
+  const handleGoToCards = () => {
+    window.location.href = "/my-cards";
   };
 
   const nextStep = useCallback(() => {
@@ -153,9 +157,7 @@ const NewCard = () => {
     setStep(step - 1);
   }, [step]);
 
-  const handleGoToCards = () => {
-    window.location.href = "/my-cards";
-  };
+ 
   const submitAnotherCard = () => {
     setStep(1);
     setName("");
@@ -206,7 +208,7 @@ const NewCard = () => {
   };
 
   return (
-    <div className="flex items-center justify-center py-8 md:py-20">
+    <div className="flex items-center justify-center py-8 md:py-20 w-full">
       <div className="px-8 md:w-3/5 md:mx-auto">
         {step === 1 && (
           <motion.div
@@ -342,14 +344,15 @@ const NewCard = () => {
           >
             <h1 className="text-4xl font-semibold">
               {" "}
-              📚 Generated Flashcards{" "}
+              📚 Generate Flashcards{" "}
             </h1>
             <p className="text-xl font-light mt-4 leading-8">
-              Based on the information provided, here are your generated
-              flashcards. You can review and edit them if needed.
+              Enter a topic below and click generate to generate a set 0f 10 flashcards. Want to increase 
+              the limit? Join our premium version <span className="text-blue-400 underline">here</span>
             </p>
+            <div className="w-full">
             <Flashcards setFlashcardsInParent={setFlashcards} />{" "}
-            {/* Integrating the Flashcards component here */}
+            {/* Integrating the Flashcards component here */}</div>
           </motion.div>
         )}
 
@@ -433,7 +436,7 @@ const NewCard = () => {
                 onClick={handleGoToCards}
                 className="bg-[#ff6154] text-white py-2 px-4 rounded mt-4 flex w-60 justify-center items-center cursor-pointer"
               >
-                Go to your collection
+                Browse your collections
               </div>
 
               <Separator />

@@ -50,7 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({ initialAuthenticatedUser }) => {
           <Search />
         </div>
         <div className="absolute right-1/2 translate-x-1/2 transform z-10">
-          <Menu />
+          <Menu authenticatedUser={authenticatedUser} />
         </div>
         <div className="flex items-center text-sm space-x-6 cursor-pointer">
           {authenticatedUser ? (

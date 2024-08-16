@@ -41,7 +41,7 @@ const Flashcards = ({ setFlashcardsInParent }: Props) => {
 
   return (
     <>
-      <div className="mx-auto py-10 px-6 lg:w-3/5">
+      <div className="mx-auto py-10 px-6 w-full">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex-grow w-full">
           <Generate onTopicChange={setTopic} />

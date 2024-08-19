@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import Flashcards from "@/app/flashcards/page"; // Import the Flashcards component
+import Flashcards from "@/app/flashcards/page";
 import { Separator } from "@/components/ui/separator";
 import { FlashcardContent } from "@/types";
 import { v4 as uuidv4 } from "uuid";
@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { PiXCircleFill } from "react-icons/pi";
 import Link from "next/link";
+import FlashCard from "@/components/flashcards/FlashCard"; // Import the updated FlashCard component
 
 const categories = [
   "Media",
@@ -64,8 +65,8 @@ const NewCard = () => {
     setName(truncatedName);
     const slugValue = truncatedName
       .toLowerCase()
-      .replace(/\s+/g, "-") // Replace spaces with hyphens
-      .replace(/\./g, "-"); // Replace periods with hyphens in the slug
+      .replace(/\s+/g, "-")
+      .replace(/\./g, "-");
     setSlug(slugValue);
   };
 
@@ -78,6 +79,7 @@ const NewCard = () => {
       setSelectedCategories((prevCategories) => [...prevCategories, category]);
     }
   };
+
   const handleGoToCards = () => {
     window.location.href = "/my-cards";
   };
@@ -157,7 +159,6 @@ const NewCard = () => {
     setStep(step - 1);
   }, [step]);
 
- 
   const submitAnotherCard = () => {
     setStep(1);
     setName("");
@@ -342,17 +343,16 @@ const NewCard = () => {
             transition={{ duration: 0.3 }}
             className="space-y-10"
           >
-            <h1 className="text-4xl font-semibold">
-              {" "}
-              📚 Generate Flashcards{" "}
-            </h1>
+            <h1 className="text-4xl font-semibold"> 📚 Generate Flashcards </h1>
             <p className="text-xl font-light mt-4 leading-8">
-              Enter a topic below and click generate to generate a set 0f 10 flashcards. Want to increase 
-              the limit? Join our premium version <span className="text-blue-400 underline">here</span>
+              Enter a topic below and click generate to generate a set 0f 10
+              flashcards. Want to increase the limit? Join our premium version{" "}
+              <span className="text-blue-400 underline">here</span>
             </p>
             <div className="w-full">
-            <Flashcards setFlashcardsInParent={setFlashcards} />{" "}
-            {/* Integrating the Flashcards component here */}</div>
+              <Flashcards setFlashcardsInParent={setFlashcards} />{" "}
+              {/* Integrating the Flashcards component here */}
+            </div>
           </motion.div>
         )}
 
@@ -395,23 +395,19 @@ const NewCard = () => {
               </div>
             </div>
 
-            {/* Displaying the generated flashcards */}
+            {/* Displaying the generated flashcards with enhanced UI */}
             <div>
               <h2 className="font-semibold">Generated Flashcards</h2>
-              <div className="mt-4 space-y-4">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
                 {flashcards.map((flashcard, index) => (
-                  <div
+                  <FlashCard
                     key={index}
-                    className="border p-4 rounded-md shadow-md bg-white"
-                  >
-                    <p className="font-semibold">Flashcard {index + 1}</p>
-                    <p>
-                      <strong>Front:</strong> {flashcard.front}
-                    </p>
-                    <p>
-                      <strong>Back:</strong> {flashcard.back}
-                    </p>
-                  </div>
+                    card={{
+                      id: flashcard.id,
+                      front: flashcard.front,
+                      back: flashcard.back,
+                    }}
+                  />
                 ))}
               </div>
             </div>

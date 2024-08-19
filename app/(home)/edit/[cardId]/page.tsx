@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
+import FlashCard from "@/components/flashcards/FlashCard"; // Import the FlashCard component
 
 interface IParams {
   authenticatedUser: any;
@@ -94,20 +95,16 @@ const CardIDPage = async ({ params }: { params: IParams }) => {
       </div>
 
       <h2 className="font-semibold text-xl pb-6">Generated Flashcards</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex flex-wrap gap-5">
         {card.flashcards.map((flashcard, index) => (
-          <Card key={index} className="border p-4 rounded-lg shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">Flashcard {index + 1}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="font-medium">Front:</p>
-              <p className="text-gray-700">{flashcard.front}</p>
-              <Separator className="my-2" />
-              <p className="font-medium">Back:</p>
-              <p className="text-gray-700">{flashcard.back}</p>
-            </CardContent>
-          </Card>
+          <FlashCard
+            key={index}
+            card={{
+              id: flashcard.id,
+              front: flashcard.front,
+              back: flashcard.back,
+            }}
+          />
         ))}
       </div>
 
@@ -140,9 +137,7 @@ const CardIDPage = async ({ params }: { params: IParams }) => {
       ) : (
         <div className="pt-4">
           <h2 className="text-xl font-semibold">No comments yet</h2>
-          <p className="text-gray-500 pt-4">
-            Be the first to comment on this card
-          </p>
+          <p className="text-gray-500 pt-4">No comments to show</p>
         </div>
       )}
     </div>

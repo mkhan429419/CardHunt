@@ -2,6 +2,10 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PiCheck, PiCopy } from "react-icons/pi";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import Twitter from '@/components/twt.png'
+import Instagram from '@/components/insta2.png'
+import LinkedIn from '@/components/link.png'
+import Facebook from '@/components/face.png'
 
 interface ShareModalContentProps {
   currentCollection?: any; // Add this line to accept currentCollection as an optional prop
@@ -70,7 +74,7 @@ const ShareModalContent: React.FC<ShareModalContentProps> = ({
               >
                 <Image
                   priority
-                  src="/logo/twitter-logo.png"
+                  src={Twitter}
                   width={50}
                   height={50}
                   alt="twitter"
@@ -82,11 +86,11 @@ const ShareModalContent: React.FC<ShareModalContentProps> = ({
                 href={instagramShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-pink-400 text-white p-5 rounded-md flex items-center justify-center"
+                className="bg-pink-100 text-white p-5 rounded-md flex items-center justify-center"
               >
                 <Image
                   priority
-                  src="/logo/instagram-logo.png"
+                  src={Instagram}
                   width={50}
                   height={50}
                   alt="instagram"
@@ -98,11 +102,11 @@ const ShareModalContent: React.FC<ShareModalContentProps> = ({
                 href={linkedinShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-blue-700 text-white p-5 rounded-md flex items-center justify-center"
+                className="bg-blue-200 text-white p-5 rounded-md flex items-center justify-center"
               >
                 <Image
                   priority
-                  src="/logo/linkedin-logo.png"
+                  src={LinkedIn}
                   width={50}
                   height={50}
                   alt="linkedin"
@@ -114,11 +118,11 @@ const ShareModalContent: React.FC<ShareModalContentProps> = ({
                 href={facebookShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-blue-600 text-white p-5 rounded-md flex items-center justify-center"
+                className="bg-blue-400 text-white p-5 rounded-md flex items-center justify-center"
               >
                 <Image
                   priority
-                  src="/logo/facebook-logo.png"
+                  src={Facebook}
                   width={50}
                   height={50}
                   alt="facebook"

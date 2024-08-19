@@ -501,3 +501,49 @@ export const getFlashcardCollectionsByUserId = async (userId: string) => {
     return [];
   }
 };
+
+export const getCategories = async () => {
+  try {
+    const categories = await db.category.findMany({
+      include: {
+        flashcardCollections: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    // Filtering categories that have at least one associated flashcard collection
+    const filteredCategories = categories.filter(
+      (category) => category.flashcardCollections.length > 0
+    );
+
+    return filteredCategories;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+};
+
+export const getFlashcardCollectionsByCategoryName = async (category: string) => {
+  try {
+    const flashcardCollections = await db.flashcardCollection.findMany({
+      where: {
+        categories: {
+          some: {
+            name: category,
+          },
+        },
+      },
+      include: {
+        user: true,
+        categories: true,
+      },
+    });
+    return flashcardCollections;
+  } catch (error) {
+    console.error("Error fetching flashcard collections by category name:", error);
+    return [];
+  }
+};

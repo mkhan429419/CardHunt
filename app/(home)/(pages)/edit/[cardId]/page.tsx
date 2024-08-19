@@ -29,16 +29,9 @@ const CardIDPage = async ({ params }: { params: IParams }) => {
 
   const cardRank = await getRankById();
 
-  // Calculate total comments and upvotes from all flashcards in the collection
-  const totalComments = card.flashcards.reduce(
-    (acc, flashcard) => acc + flashcard.Comment.length,
-    0
-  );
-
-  const totalUpvotes = card.flashcards.reduce(
-    (acc, flashcard) => acc + flashcard.Upvote.length,
-    0
-  );
+  // Calculate total comments and upvotes from the flashcard collection
+  const totalComments = card.comments.length;
+  const totalUpvotes = card.upvotes.length;
 
   return (
     <div className="md:w-4/5 mx-auto px-6 md:px-0 py-10">
@@ -126,25 +119,23 @@ const CardIDPage = async ({ params }: { params: IParams }) => {
 
       {totalComments > 0 ? (
         <div className="mt-4 space-y-4">
-          {card.flashcards.flatMap((flashcard) =>
-            flashcard.Comment.map((comment: any) => (
-              <div key={comment.id} className="border p-4 rounded-lg">
-                <div className="flex gap-x-4 items-center">
-                  <Image
-                    src={comment.user.image}
-                    alt="profile"
-                    width={50}
-                    height={50}
-                    className="h-12 w-12 rounded-full"
-                  />
-                  <div>
-                    <h2 className="font-semibold">{comment.user.name}</h2>
-                    <p className="text-gray-500">{comment.body}</p>
-                  </div>
+          {card.comments.map((comment: any) => (
+            <div key={comment.id} className="border p-4 rounded-lg">
+              <div className="flex gap-x-4 items-center">
+                <Image
+                  src={comment.user.image}
+                  alt="profile"
+                  width={50}
+                  height={50}
+                  className="h-12 w-12 rounded-full"
+                />
+                <div>
+                  <h2 className="font-semibold">{comment.user.name}</h2>
+                  <p className="text-gray-500">{comment.body}</p>
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
       ) : (
         <div className="pt-4">

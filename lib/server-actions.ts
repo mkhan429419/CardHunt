@@ -526,7 +526,9 @@ export const getCategories = async () => {
   }
 };
 
-export const getFlashcardCollectionsByCategoryName = async (category: string) => {
+export const getFlashcardCollectionsByCategoryName = async (
+  category: string
+) => {
   try {
     const flashcardCollections = await db.flashcardCollection.findMany({
       where: {
@@ -543,7 +545,32 @@ export const getFlashcardCollectionsByCategoryName = async (category: string) =>
     });
     return flashcardCollections;
   } catch (error) {
-    console.error("Error fetching flashcard collections by category name:", error);
+    console.error(
+      "Error fetching flashcard collections by category name:",
+      error
+    );
     return [];
   }
 };
+
+export const searchFlashcardCollections = async (query: string) => {
+  try {
+    const collections = await db.flashcardCollection.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      include: {
+        user: true, // To get the user details such as name and image
+      },
+    });
+
+    return collections;
+  } catch (error) {
+    console.error("Error searching flashcard collections:", error);
+    return [];
+  }
+};
+

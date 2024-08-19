@@ -15,7 +15,7 @@ import {
   getOwnerFlashcardCollections,
   getUserTotalComments,
   getUserTotalUpvotes,
-  getUserRecentActivity,
+  getUserRecentActivity, // Ensure this is imported
 } from "@/lib/server-actions";
 import OverviewChart from "@/components/overview-chart";
 import RecentActivity from "@/components/recent-activity";
@@ -35,9 +35,9 @@ const UserDashboard = async () => {
   const userId = authenticatedUser.user.id;
 
   const flashcardCollections = await getOwnerFlashcardCollections();
-  const totalUpvotes = await getUserTotalUpvotes(userId!); // ! asserts that userId is non-null
+  const totalUpvotes = await getUserTotalUpvotes(userId!); 
   const totalComments = await getUserTotalComments(userId!);
-  const recentActivity = await getUserRecentActivity(userId!);
+  const recentActivity = await getUserRecentActivity(userId!); 
 
   const data = {
     totalPosts: flashcardCollections.length,
@@ -52,7 +52,7 @@ const UserDashboard = async () => {
           <div className="flex gap-x-6 items-center py-10">
             <Link href={"/"}>
               <Image
-                src={authenticatedUser.user.image || LogoSmall} // Use user's profile image
+                src={authenticatedUser.user.image || LogoSmall} 
                 alt="User Profile"
                 width={500}
                 height={500}
@@ -127,3 +127,4 @@ const UserDashboard = async () => {
 };
 
 export default UserDashboard;
+

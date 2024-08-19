@@ -574,3 +574,89 @@ export const searchFlashcardCollections = async (query: string) => {
   }
 };
 
+export const isUserPremium = async (userId: string) => {
+  // Fetch the user from the database based on userId
+  const user = await db.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user.isPremium;
+};
+
+export const setUserPremium = async (userId: string) => {
+  try {
+    await db.user.update({
+      where: { id: userId },
+      data: { isPremium: true },
+    });
+  } catch (error) {
+    console.error("Error setting user to premium:", error);
+    throw new Error("Failed to upgrade membership.");
+  }
+};
+
+export const getUserRecentActivity = async (userId: string) => {
+  try {
+    // Fetch recent upvotes on the user's flashcard collections
+    const recentUpvotes = await db.upvote.findMany({
+      where: {
+        flashcardCollection: {
+          userId: userId,
+        },
+      },
+      include: {
+        flashcardCollection: true,
+        user: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5, // Limit the number of recent upvotes
+    });
+
+    // Add the type "UPVOTE" to each upvote activity
+    const upvoteActivity = recentUpvotes.map((upvote) => ({
+      ...upvote,
+      type: "UPVOTE",
+    }));
+
+    // Fetch recent comments on the user's flashcard collections
+    const recentComments = await db.comment.findMany({
+      where: {
+        flashcardCollection: {
+          userId: userId,
+        },
+      },
+      include: {
+        flashcardCollection: true,
+        user: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5, // Limit the number of recent comments
+    });
+
+    // Add the type "COMMENT" to each comment activity
+    const commentActivity = recentComments.map((comment) => ({
+      ...comment,
+      type: "COMMENT",
+    }));
+
+    // Combine the recent upvotes and comments into a single array
+    const recentActivity = [...upvoteActivity, ...commentActivity].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+
+    return recentActivity;
+  } catch (error) {
+    console.error("Error fetching recent activity:", error);
+    return [];
+  }
+};

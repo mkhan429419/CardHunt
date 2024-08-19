@@ -56,7 +56,7 @@ const Navbar: React.FC<NavbarProps> = ({ initialAuthenticatedUser, flashcardColl
         <div className="flex items-center text-sm space-x-6 cursor-pointer">
           {authenticatedUser ? (
             <>
-              <Submit />
+              <Submit authenticatedUser={authenticatedUser} />
               <NotificationIcon />
               <Avatar authenticatedUser={authenticatedUser} />
             </>

@@ -17,8 +17,10 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activity }) => {
             className="rounded-full h-8 w-8"
           />
           <div className="text-gray-500">
-            {act.type === "UPVOTE" && `${act.user.name} upvoted your flashcard.`}
-            {act.type === "COMMENT" && `${act.user.name} commented on your flashcard.`}
+            {act.type === "UPVOTE" &&
+              `${act.user.name} upvoted your flashcard.`}
+            {act.type === "COMMENT" &&
+              `${act.user.name} commented on your flashcard.`}
           </div>
           <div className="text-xs text-gray-800">
             {new Date(act.createdAt).toDateString()}

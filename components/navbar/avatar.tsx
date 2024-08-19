@@ -53,11 +53,11 @@ const Avatar: React.FC<AvatarProps> = ({ authenticatedUser }) => {
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Link
-              href="/settings"
+              href="/"
               className="flex gap-x-2 rounded-sm w-full cursor-pointer"
             >
               <PiGear className="text-xl" />
-              Settings
+              About
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>

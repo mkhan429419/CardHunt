@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import {
   Carousel,
@@ -24,7 +25,9 @@ const FlippableCard: React.FC<{ flashcard: Flashcard }> = ({ flashcard }) => {
       onClick={flip}
     >
       <motion.div
-        className={`absolute inset-0 w-full h-full rounded-lg shadow-lg transition-transform duration-1000 ${isFlipped ? "rotate-y-180" : ""}`}
+        className={`absolute inset-0 w-full h-full rounded-lg shadow-lg transition-transform duration-1000 ${
+          isFlipped ? "rotate-y-180" : ""
+        }`}
         style={{ transformStyle: "preserve-3d" }}
       >
         <motion.div
@@ -43,9 +46,7 @@ const FlippableCard: React.FC<{ flashcard: Flashcard }> = ({ flashcard }) => {
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
           <div className="flex flex-col justify-center items-center h-full w-full p-6 bg-gradient-to-r from-purple-100 to-pink-100 border border-gray-300 shadow-lg rounded-lg">
-            <p className="text-md text-gray-700 italic">
-              {flashcard.back}
-            </p>
+            <p className="text-md text-gray-700 italic">{flashcard.back}</p>
           </div>
         </motion.div>
       </motion.div>

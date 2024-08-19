@@ -398,3 +398,106 @@ export const deleteComment = async (commentId: string) => {
     throw error;
   }
 };
+
+export const getUpvotedFlashcardCollections = async () => {
+  try {
+    const authenticatedUser = await auth();
+
+    if (
+      !authenticatedUser ||
+      !authenticatedUser.user ||
+      !authenticatedUser.user.id
+    ) {
+      throw new Error("User ID is missing or invalid");
+    }
+
+    const userId = authenticatedUser.user.id;
+
+    const upvotedFlashcardCollections = await db.upvote.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        flashcardCollection: {
+          include: {
+            user: true,
+            categories: true,
+            flashcards: true,
+            comments: {
+              include: {
+                user: true,
+              },
+            },
+            upvotes: true,
+          },
+        },
+      },
+    });
+
+    return upvotedFlashcardCollections.map(
+      (upvote) => upvote.flashcardCollection
+    );
+  } catch (error) {
+    console.error("Error getting upvoted flashcard collections:", error);
+    return [];
+  }
+};
+
+export const getFlashcardCollectionBySlug = async (slug: string) => {
+  try {
+    const flashcardCollection = await db.flashcardCollection.findUnique({
+      where: {
+        slug,
+      },
+      include: {
+        categories: true,
+        flashcards: true,
+        comments: {
+          include: {
+            user: true,
+          },
+        },
+        upvotes: {
+          include: {
+            user: true,
+          },
+        },
+        user: true,
+      },
+    });
+    return flashcardCollection;
+  } catch (error) {
+    console.error("Error getting flashcard collection by slug:", error);
+    return null;
+  }
+};
+
+export const getFlashcardCollectionsByUserId = async (userId: string) => {
+  try {
+    const flashcardCollections = await db.flashcardCollection.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        categories: true,
+        flashcards: true,
+        comments: {
+          include: {
+            user: true,
+          },
+        },
+        upvotes: {
+          include: {
+            user: true,
+          },
+        },
+        user: true,
+      },
+    });
+
+    return flashcardCollections;
+  } catch (error) {
+    console.error("Error getting flashcard collections by user ID:", error);
+    return [];
+  }
+};

@@ -13,9 +13,10 @@ import Submit from "./submit";
 
 interface NavbarProps {
   initialAuthenticatedUser?: any;
+  flashcardCollections?: any; // Add this to pass flashcard collections if needed
 }
 
-const Navbar: React.FC<NavbarProps> = ({ initialAuthenticatedUser }) => {
+const Navbar: React.FC<NavbarProps> = ({ initialAuthenticatedUser, flashcardCollections }) => {
   const [authModalVisible, setAuthModalVisible] = useState(false);
   const [authenticatedUser, setAuthenticatedUser] = useState(initialAuthenticatedUser);
   const [hydrated, setHydrated] = useState(false); // New state to track hydration

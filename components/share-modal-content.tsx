@@ -18,7 +18,7 @@ const ShareModalContent: React.FC<ShareModalContentProps> = ({
   const [copiedText, setCopiedText] = useState("");
   const [isCopied, setIsCopied] = useState(false);
 
-  const urlPrefix = "https://product-hunt-clone-final.vercel.app/product/";
+  const urlPrefix = "https://card-hunt.vercel.app/product/";
 
   useEffect(() => {
     if (currentCollection && currentCollection.slug) {
